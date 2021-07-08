@@ -1,24 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import { ApolloProvider } from "@apollo/react-hooks";
+import { ApolloClient, HttpLink, InMemoryCache } from "apollo-boost";
+import { Switch, Route } from 'react-router-dom'
+import Header from './components/Header'
+import VaccineList from "./components/VaccineList";
+import PatientList from "./components/PatientList";
 
 function App() {
+  const httpLink = new HttpLink({
+    uri: "https://ger-test.hasura.app/v1/graphql",
+    headers: {
+      'x-hasura-admin-secret': process.env.REACT_APP_HASURA_GRAPHQL_ADMIN_SECRET
+    }
+  });
+
+  const client = new ApolloClient({
+    link: httpLink,
+    cache: new InMemoryCache(),
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ApolloProvider client={client}>
+      <Header />
+      <Switch>
+        <Route exact path="/" component={() => 'Home'} />  
+        <Route exact path="/vaccines" component={VaccineList} />
+        <Route exact path="/patients" component={PatientList} />
+      </Switch>
+    </ApolloProvider>
   );
 }
 
